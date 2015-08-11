@@ -83,7 +83,7 @@ public abstract class AWSAntTask extends Task {
         }
         Map<List<String>, Object> cache = getProject().getReference(CLIENT_CACHE_REFERENCE);
         
-        List<String> key = Arrays.asList(clientClass.getName(), this.awsRegion);
+        List<String> key = Arrays.asList(clientClass.getName(), this.awsAccessKeyId, this.awsSecretKey, this.awsRegion);
         
         T client = (T) cache.get(key);
         if(client == null) {

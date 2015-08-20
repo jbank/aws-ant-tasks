@@ -27,4 +27,9 @@
     <taskdef name="update-cloudformation-stack" classname="com.amazonaws.ant.cloudformation.UpdateStackTask" />
     <taskdef name="let-cloudformation-stack-reach-status" classname="com.amazonaws.ant.cloudformation.WaitForStackToReachStateTask" />
     <taskdef name="describe-cloudformation-stack" classname="com.amazonaws.ant.cloudformation.DescribeStackTask" />
+
+    <taskdef name="create-codedeploy-app" classname="com.amazonaws.ant.codedeploy.CreateApplicationTask" />
+    <taskdef name="create-codedeploy-deployment-group" classname="com.amazonaws.ant.codedeploy.CreateDeploymentGroupTask" />
+    <taskdef name="create-codedeploy-deployment" classname="com.amazonaws.ant.codedeploy.CreateDeploymentTask" />
+    <taskdef name="let-codedeploy-deployment-reach-status" classname="com.amazonaws.ant.codedeploy.WaitForDeploymentToReachStateTask" />
 </antlib>

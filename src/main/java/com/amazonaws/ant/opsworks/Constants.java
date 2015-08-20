@@ -23,6 +23,7 @@ public class Constants {
     public static final String STACK_ID_PROPERTY = "stackId";
     public static final String LAYER_IDS_PROPERTY = "layerIds";
     public static final String INSTANCE_IDS_PROPERTY = "instanceIds";
+    public static final String DEPLOYMENT_ID_PROPERTY = "deploymentId";
     public static final String DEPLOYMENT_IDS_PROPERTY = "deploymentIds";
 
     // This is used when creating a stack--if the task tries to set "stackId"

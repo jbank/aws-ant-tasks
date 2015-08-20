@@ -3,3 +3,5 @@ target
 .classpath
 bin
 dependency-reduced-pom.xml
+.idea
+aws-java-sdk-ant-tasks.iml

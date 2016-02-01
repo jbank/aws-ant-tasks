@@ -32,4 +32,9 @@
     <taskdef name="create-codedeploy-deployment-group" classname="com.amazonaws.ant.codedeploy.CreateDeploymentGroupTask" />
     <taskdef name="create-codedeploy-deployment" classname="com.amazonaws.ant.codedeploy.CreateDeploymentTask" />
     <taskdef name="let-codedeploy-deployment-reach-status" classname="com.amazonaws.ant.codedeploy.WaitForDeploymentToReachStateTask" />
+    
+    <taskdef name="find-autoscalinggroups-by-tags" classname="com.amazonaws.ant.autoscaling.FindAutoScaleGroupsTask" />
+    
+    <componentdef name="autoscaling.equals" classname="com.amazonaws.ant.autoscaling.condition.Equals"/>
+    <componentdef name="autoscaling.or" classname="com.amazonaws.ant.autoscaling.condition.Or"/>
 </antlib>

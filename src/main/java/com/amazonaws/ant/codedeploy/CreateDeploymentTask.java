@@ -1,7 +1,6 @@
 package com.amazonaws.ant.codedeploy;
 
 import com.amazonaws.ant.AWSAntTask;
-import com.amazonaws.ant.opsworks.Constants;
 import com.amazonaws.services.codedeploy.AmazonCodeDeployClient;
 import com.amazonaws.services.codedeploy.model.*;
 import org.apache.tools.ant.BuildException;

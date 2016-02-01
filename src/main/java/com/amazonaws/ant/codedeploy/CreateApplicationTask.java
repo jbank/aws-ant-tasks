@@ -22,7 +22,6 @@ public class CreateApplicationTask extends AWSAntTask
         if (areMalformedParams) {
             throw new BuildException(errors.toString());
         }
-
     }
 
     @Override

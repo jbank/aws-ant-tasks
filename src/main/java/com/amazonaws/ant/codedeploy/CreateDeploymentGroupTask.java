@@ -10,6 +10,7 @@ import com.amazonaws.services.codedeploy.model.EC2TagFilterType;
 
 import org.apache.tools.ant.BuildException;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class CreateDeploymentGroupTask extends AWSAntTask
     private String deploymentConfigName;
     private String serviceRoleArn;
     private List<EC2TagFilter> ec2TagFilters = new LinkedList<EC2TagFilter>();
-    private List<String> autoScaleGroups = new LinkedList<String>();
+    private List<String> autoScalingGroups = new LinkedList<String>();
 
     private void checkParams()
     {
@@ -74,9 +75,9 @@ public class CreateDeploymentGroupTask extends AWSAntTask
         {
             createDeploymentGroupRequest.setEc2TagFilters(this.ec2TagFilters);
         }
-        if(this.autoScaleGroups.size() > 0)
+        if(this.autoScalingGroups.size() > 0)
         {
-            createDeploymentGroupRequest.setAutoScalingGroups(this.autoScaleGroups);
+            createDeploymentGroupRequest.setAutoScalingGroups(this.autoScalingGroups);
         }
 
         try
@@ -148,11 +149,12 @@ public class CreateDeploymentGroupTask extends AWSAntTask
      * Allows you to add any number of nested preconfigured AutoScaleGroup
      * elements.
      *
-     * @param autoScaleGroup a preconfigured AutoScaleGroup object.
+     * @param autoScalingGroup a preconfigured AutoScalingGroup object.
      */
-    public void addConfiguredAutoScaleGroup(AutoScaleGroup autoScaleGroup)
+    public void addConfiguredAutoScalingGroup(AutoScalingGroup autoScalingGroup)
     {
-        this.autoScaleGroups.add(autoScaleGroup.getValue());
+        List<String> autoScalingGroups = Arrays.asList(autoScalingGroup.getValue().split(autoScalingGroup.getDelimiter()));
+        this.autoScalingGroups.addAll(autoScalingGroups);
     }
 
     /**
@@ -181,10 +183,22 @@ public class CreateDeploymentGroupTask extends AWSAntTask
     }
 
     /**
-     * Nested element for specifying a AutoScaleGroup. Set the value to the
-     * AutoScaleGroup you want to add to the deployment group.
+     * Nested element for specifying a AutoScalingGroup. Set the value to the
+     * AutoScalingGroup you want to add to the deployment group.
      */
-    public static class AutoScaleGroup extends SimpleNestedElement
+    public static class AutoScalingGroup extends SimpleNestedElement
     {
+        private String delimiter = Constants.DEFAULT_DELIMITER;
+        
+        public void setDelimiter(String delimiter)
+        {
+            this.delimiter = delimiter;
+        }
+        
+        public String getDelimiter()
+        {
+            return this.delimiter;
+        }
+        
     }
 }

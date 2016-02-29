@@ -14,21 +14,27 @@
  */
 package com.amazonaws.ant.cloudformation;
 
+import com.amazonaws.ant.autoscaling.Constants;
 import org.apache.tools.ant.BuildException;
 
 import com.amazonaws.ant.AWSAntTask;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 public class WaitForStackToReachStateTask extends AWSAntTask {
 
     private static final String FAILED = "FAILED";
     private String stackName;
     private String status;
+    private String delimiter = Constants.DEFAULT_DELIMITER;
 
     /**
      * Set the name of this stack. Required.
-     * 
+     *
      * @param stackName
      *            The stack name
      */
@@ -39,12 +45,17 @@ public class WaitForStackToReachStateTask extends AWSAntTask {
     /**
      * Set the status to wait for this stack to reach. Should not contain
      * "FAILED"
-     * 
+     *
      * @param status
      *            The status to wait for this stack to reach.
      */
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public void setDelimiter( String delimiter )
+    {
+        this.delimiter = delimiter;
     }
 
     /**
@@ -63,7 +74,7 @@ public class WaitForStackToReachStateTask extends AWSAntTask {
 
         if (status == null) {
             areMissingParams = true;
-            errors.append("Missing parameter: stackName is required \n");
+            errors.append("Missing parameter: status is required \n");
         }
 
         if (areMissingParams) {
@@ -74,14 +85,16 @@ public class WaitForStackToReachStateTask extends AWSAntTask {
     public void execute() {
         checkParams();
         AmazonCloudFormationClient client = getOrCreateClient(AmazonCloudFormationClient.class);
-        if (!waitForCloudFormationStackToReachStatus(client, stackName, status)) {
+        if (!waitForCloudFormationStackToReachStatus(client, stackName, status, delimiter)) {
             throw new BuildException("The stack update or creation failed");
         }
     }
 
     public static boolean waitForCloudFormationStackToReachStatus(
-            AmazonCloudFormationClient client, String stackName, String status) {
+            AmazonCloudFormationClient client, String stackName, String status, String delimiter) {
         int count = 0;
+        Set<String> statuses = new HashSet<String>();
+        statuses.addAll((delimiter == null)? Arrays.asList(status): Arrays.asList(status.split(delimiter)));
         while (true) {
             if (count++ == 100) {
                 System.out
@@ -99,7 +112,8 @@ public class WaitForStackToReachStateTask extends AWSAntTask {
                             new DescribeStacksRequest()
                                     .withStackName(stackName)).getStacks()
                     .get(0).getStackStatus();
-            if (stackStatus.equals(status)) {
+
+            if (statuses.contains(stackStatus)) {
                 return true;
             } else if (stackStatus.contains(FAILED)) {
                 System.out.println("The process failed with status " + stackStatus);

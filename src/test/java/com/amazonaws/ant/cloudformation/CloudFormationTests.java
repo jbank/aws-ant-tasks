@@ -60,7 +60,7 @@ public class CloudFormationTests {
         createStackTask.addConfiguredStackParameter(parameter);
         createStackTask.execute();
         Assert.assertTrue(WaitForStackToReachStateTask.waitForCloudFormationStackToReachStatus(client,
-                STACK_NAME, CREATE_COMPLETE));
+                STACK_NAME, CREATE_COMPLETE, null));
         
         SetStackPolicyTask policyTask = new SetStackPolicyTask();
         policyTask.setProject(project);
@@ -100,7 +100,7 @@ public class CloudFormationTests {
         //The update should be denied by the stack policy, so it should fail and roll back the stack.
         Assert.assertTrue(WaitForStackToReachStateTask
                 .waitForCloudFormationStackToReachStatus(client, STACK_NAME,
-                        UPDATE_ROLLBACK_COMPLETE));
+                        UPDATE_ROLLBACK_COMPLETE, null));
         
         UpdateStackTask successfulUpdate = new UpdateStackTask();
         successfulUpdate.setProject(project);
@@ -114,7 +114,7 @@ public class CloudFormationTests {
         successfulUpdate.execute();
         Assert.assertTrue(WaitForStackToReachStateTask
                 .waitForCloudFormationStackToReachStatus(client, STACK_NAME,
-                        UPDATE_COMPLETE));
+                        UPDATE_COMPLETE, null));
     }
 
     @AfterClass

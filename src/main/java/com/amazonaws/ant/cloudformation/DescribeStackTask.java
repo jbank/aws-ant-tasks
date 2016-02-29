@@ -17,15 +17,11 @@ package com.amazonaws.ant.cloudformation;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.amazonaws.services.cloudformation.model.*;
 import org.apache.tools.ant.BuildException;
 
 import com.amazonaws.ant.AWSAntTask;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
-import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
-import com.amazonaws.services.cloudformation.model.Stack;
-import com.amazonaws.services.cloudformation.model.Parameter;
-import com.amazonaws.services.cloudformation.model.Tag;
 
 public class DescribeStackTask extends AWSAntTask {
 
@@ -33,6 +29,7 @@ public class DescribeStackTask extends AWSAntTask {
     
     private Map<String, StackItem> parameters = new HashMap<String, StackItem>();
     private Map<String, StackItem> tags = new HashMap<String, StackItem>();
+    private Map<String, StackItem> outputs = new HashMap<String, StackItem>();
     
     /**
      * Set the name of this stack. Required.
@@ -62,6 +59,11 @@ public class DescribeStackTask extends AWSAntTask {
      */
     public void addConfiguredStackTag(StackItem stackTag) {
         tags.put(stackTag.getName(), stackTag);
+    }
+
+    public void addConfiguredStackOutput(StackItem stackOutput)
+    {
+        outputs.put(stackOutput.getName(), stackOutput);
     }
     
     private void checkParams() {
@@ -102,14 +104,14 @@ public class DescribeStackTask extends AWSAntTask {
             }
             
             for(StackItem item : parameters.values()) {
-                getProject().setNewProperty(item.getName(), item.getDefault());
+                getProject().setNewProperty(item.getProperty(), item.getDefault());
             }
             
             if(stack.getTags() != null) {
                 for(Tag tag : stack.getTags()) {
                     StackItem item = tags.remove(tag.getKey());
                     if(item != null) {
-                        getProject().setNewProperty(item.getName(), tag.getValue());
+                        getProject().setNewProperty(item.getProperty(), tag.getValue());
                     }
                 }
             }
@@ -117,6 +119,20 @@ public class DescribeStackTask extends AWSAntTask {
             for(StackItem item : tags.values()) {
                 getProject().setNewProperty(item.getProperty(), item.getDefault());
             }
+
+            if(stack.getOutputs() != null) {
+                for(Output output : stack.getOutputs()) {
+                    StackItem item = outputs.remove(output.getOutputKey());
+                    if(item != null) {
+                        getProject().setNewProperty(item.getProperty(), output.getOutputValue());
+                    }
+                }
+            }
+
+            for(StackItem item : outputs.values()) {
+                getProject().setNewProperty(item.getProperty(), item.getDefault());
+            }
+
         } catch (Exception e) {
             throw new BuildException(
                     "Could not describe stack " + e.getMessage(), e);

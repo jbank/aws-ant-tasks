@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 
@@ -75,24 +76,29 @@ public class FindAutoScaleGroupsTask extends AWSAntTask
         try
         {
             List<String> autoScalingGroups = new ArrayList<String>();
-            DescribeAutoScalingGroupsResult result = client.describeAutoScalingGroups();
-
-            log("Found " + result.getAutoScalingGroups().size() + " AutoScalingGroups.", Project.MSG_DEBUG);
-            for( AutoScalingGroup autoScalingGroup : result.getAutoScalingGroups() )
+            String nextToken = null;
+            do
             {
-                log("Checking AutoScalingGroup [" + autoScalingGroup.getAutoScalingGroupName() + "]", Project.MSG_DEBUG);
-                for( TagDescription tag : autoScalingGroup.getTags() )
-                {
-                    AutoScalingGroupTag autoScalingGroupTag = this.tags.get(tag.getKey());
-                    log("Looking for tag [" + tag.getKey() + "] -> " + (autoScalingGroupTag != null ? "[true]" : "[false]"), Project.MSG_DEBUG);
-                    if( autoScalingGroupTag != null && autoScalingGroupTag.eval(tag.getValue()) )
-                    {
-                        log("Adding AutoScalingGroup named [" + autoScalingGroup.getAutoScalingGroupName() + "]", Project.MSG_DEBUG);
-                        autoScalingGroups.add(autoScalingGroup.getAutoScalingGroupName());
-                    }
-                }
+                DescribeAutoScalingGroupsResult result = client.describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest().withNextToken(nextToken));
 
-            }
+                log("Found " + result.getAutoScalingGroups().size() + " AutoScalingGroups.", Project.MSG_DEBUG);
+                for( AutoScalingGroup autoScalingGroup : result.getAutoScalingGroups() )
+                {
+                    log("Checking AutoScalingGroup [" + autoScalingGroup.getAutoScalingGroupName() + "]", Project.MSG_DEBUG);
+                    for( TagDescription tag : autoScalingGroup.getTags() )
+                    {
+                        AutoScalingGroupTag autoScalingGroupTag = this.tags.get(tag.getKey());
+                        log("Looking for tag [" + tag.getKey() + "] -> " + (autoScalingGroupTag != null ? "[true]" : "[false]"), Project.MSG_DEBUG);
+                        if( autoScalingGroupTag != null && autoScalingGroupTag.eval(tag.getValue()) )
+                        {
+                            log("Adding AutoScalingGroup named [" + autoScalingGroup.getAutoScalingGroupName() + "]", Project.MSG_DEBUG);
+                            autoScalingGroups.add(autoScalingGroup.getAutoScalingGroupName());
+                        }
+                    }
+
+                }
+                nextToken = result.getNextToken();
+            } while(!StringUtils.isNullOrEmpty(nextToken));
 
             if( !autoScalingGroups.isEmpty() )
             {

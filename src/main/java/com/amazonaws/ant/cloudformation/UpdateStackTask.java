@@ -17,6 +17,7 @@ package com.amazonaws.ant.cloudformation;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.amazonaws.AmazonServiceException;
 import org.apache.tools.ant.BuildException;
 
 import com.amazonaws.ant.AWSAntTask;
@@ -46,7 +47,7 @@ public class UpdateStackTask extends AWSAntTask {
      * Allows you to add any number of nested preconfigured Capability elements.
      * Will warn you if the Capability is not supported by our model, but will
      * still try to execute.
-     * 
+     *
      * @param capability
      *            a preconfigured Capability object.
      */
@@ -67,7 +68,7 @@ public class UpdateStackTask extends AWSAntTask {
     /**
      * Allows you to add any number of nested preconfigured NotificationArn
      * elements.
-     * 
+     *
      * @param notificationArn
      *            a preconfigured NotificationArn object.
      */
@@ -78,7 +79,7 @@ public class UpdateStackTask extends AWSAntTask {
     /**
      * Allows you to add any number of nested preconfigured StackParameter
      * elements.
-     * 
+     *
      * @param stackParameter
      *            a preconfigured StackParameter object.
      */
@@ -90,7 +91,7 @@ public class UpdateStackTask extends AWSAntTask {
 
     /**
      * Set the name of this stack. Required.
-     * 
+     *
      * @param stackName
      *            The stack name
      */
@@ -102,7 +103,7 @@ public class UpdateStackTask extends AWSAntTask {
      * Set the body of a stack policy to apply. Must be well-formed, properly
      * escaped JSON if specified. If this is set, stackPolicyURL cannot be set.
      * If stackPolicyURL is set, this cannot be set. Not required.
-     * 
+     *
      * @param stackPolicyBody
      *            Well formed, properly escaped JSON specifying a stack policy.
      */
@@ -114,7 +115,7 @@ public class UpdateStackTask extends AWSAntTask {
      * Set the URL leading to the body of a stack policy to apply. If this is
      * set, stackPolicyBody cannot be set. If stackPolicyBody is set, this
      * cannot be set. Not required.
-     * 
+     *
      * @param stackPolicyURL
      *            A valid URL pointing to a JSON object specifying a stack
      *            policy.
@@ -129,7 +130,7 @@ public class UpdateStackTask extends AWSAntTask {
      * Must be well-formed, properly escaped JSON if specified. If this is set,
      * stackPolicyDuringUpdateURL cannot be set. If stackPolicyDuringUpdateURL
      * is set, this cannot be set. Not required.
-     * 
+     *
      * @param stackPolicyDuringUpdateBody
      *            Well formed, properly escaped JSON specifying a stack policy.
      */
@@ -143,7 +144,7 @@ public class UpdateStackTask extends AWSAntTask {
      * update only, overriding the currently operational policy until the update
      * completes. If this is set, stackPolicyDuringUpdateBody cannot be set. If
      * stackPolicyDuringUpdateBody is set, this cannot be set. Not required.
-     * 
+     *
      * @param stackPolicyDuringUpdateURL
      *            A valid URL pointing to a JSON object specifying a stack
      *            policy.
@@ -158,7 +159,7 @@ public class UpdateStackTask extends AWSAntTask {
      * set. If templateURL is set, this cannot be set. It is required that this
      * or templateURL be set, or that usePreviousTemplate be set to true. If
      * usePreviousTemplate is true, this should not be set.
-     * 
+     *
      * @param templateBody
      *            Well formed, properly escaped JSON specifying a template.
      */
@@ -172,7 +173,7 @@ public class UpdateStackTask extends AWSAntTask {
      * cannot be set. It is required that this or templateBody be set, or that
      * usePreviousTemplate be set to true. If usePreviousTemplate is true, this
      * should not be set.
-     * 
+     *
      * @param templateURL
      *            A valid URL pointing to a JSON object specifying a template.
      */
@@ -183,7 +184,7 @@ public class UpdateStackTask extends AWSAntTask {
     /**
      * Set whether to just use the previous template during this update. If this
      * is set, templateURL and templateBody should not be set. Not required.
-     * 
+     *
      * @param usePreviousTemplate
      *            Whether to use the previous template during this update.
      */
@@ -243,10 +244,18 @@ public class UpdateStackTask extends AWSAntTask {
             request.setNotificationARNs(notificationArns);
         }
 
-        try {
+        try
+        {
             client.updateStack(request);
             System.out.println("Update stack " + stackName
                     + " request submitted.");
+        } catch(AmazonServiceException ase) {
+            if(ase.getErrorMessage().equals("No updates are to be performed.")) {
+                // this exception is ok
+            } else {
+                throw new BuildException("Could not update stack: "
+                        + ase.getMessage(), ase);
+            }
         } catch (Exception e) {
             throw new BuildException("Could not update stack: "
                     + e.getMessage(), e);

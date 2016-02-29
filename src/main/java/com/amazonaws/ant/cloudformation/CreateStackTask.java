@@ -283,7 +283,7 @@ public class CreateStackTask extends AWSAntTask {
             System.out.println("Create stack " + stackName
                     + " request submitted.");
             if(waitForCreation) {
-                WaitForStackToReachStateTask.waitForCloudFormationStackToReachStatus(client, stackName, CREATE_COMPLETE);
+                WaitForStackToReachStateTask.waitForCloudFormationStackToReachStatus(client, stackName, CREATE_COMPLETE, null);
             }
         } catch (Exception e) {
             throw new BuildException(
